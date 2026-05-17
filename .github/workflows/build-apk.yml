@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -20,6 +22,28 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Install dependencies
         run: npm ci
+
+      - name: Bump version
+        run: |
+          VERSION_CODE=$(grep 'versionCode' android/app/build.gradle | awk '{print $2}')
+          NEW_VERSION_CODE=$((VERSION_CODE + 1))
+          VERSION_NAME="1.0.$(date +%Y%m%d)"
+
+          sed -i "s/versionCode $VERSION_CODE/versionCode $NEW_VERSION_CODE/" android/app/build.gradle
+          sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" android/app/build.gradle
+
+          cat > public/version.json << EOF
+          {
+            "latestVersionCode": $NEW_VERSION_CODE,
+            "latestVersionName": "$VERSION_NAME",
+            "apkUrl": "https://github.com/muhammertasci11/codecrafter/releases/download/v${NEW_VERSION_CODE}/codecrafter.apk",
+            "forceUpdate": true
+          }
+          EOF
+
+          echo "VERSION_CODE=$NEW_VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
       - name: Create web directory
@@ -29,8 +53,33 @@ jobs:
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/debug/*.apk android/app/build/outputs/apk/debug/codecrafter.apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION_CODE }}
+          name: CodeCrafter v${{ env.VERSION_NAME }}
+          body: |
+            Auto-generated APK build.
+            Version: ${{ env.VERSION_NAME }} (code ${{ env.VERSION_CODE }})
+          files: android/app/build/outputs/apk/debug/codecrafter.apk
+          generate_release_notes: true
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: codecrafter-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/codecrafter.apk
+
+      - name: Commit version bump
+        run: |
+          git config user.name "CodeCrafter Bot"
+          git config user.email "bot@codecrafter.app"
+          git add public/version.json android/app/build.gradle
+          git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.VERSION_NAME }} [skip ci]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push
