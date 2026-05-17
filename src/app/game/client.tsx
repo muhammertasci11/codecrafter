@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GameProvider, useGame, type View } from '@/lib/gameState'
@@ -50,6 +50,7 @@ function PaymentGate({ children }: { children: React.ReactNode }) {
 
 function GameContent() {
   const game = useGame()
+  const router = useRouter()
   const [showAuth, setShowAuth] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [syncing, setSyncing] = useState(false)
@@ -93,6 +94,7 @@ function GameContent() {
     <div className="min-h-screen bg-[var(--bg-primary)]">
       <nav className="glass border-b border-[var(--accent-blue)]/15 px-3 sm:px-4 py-2 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
+          <button onClick={() => router.push('/')} className="text-base hover:scale-110 transition-transform" title="Anasayfa">🏠</button>
           <span className="text-lg">🤖</span>
           <span className="font-bold text-sm sm:text-base text-[var(--text-primary)] hidden sm:inline">CodeCrafter</span>
         </div>

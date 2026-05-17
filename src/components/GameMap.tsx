@@ -100,6 +100,10 @@ export default function GameMap() {
           const isGate = node.id.startsWith('gate-')
           const isDemoLocked = !game.isPaid && node.sectionId !== 'basics'
 
+          const sectionIdx = SECTIONS.findIndex(s => s.id === node.sectionId)
+          const prevBossId = sectionIdx > 0 ? SECTIONS[sectionIdx - 1].boss.id : null
+          const prevBossDone = prevBossId ? game.progress.completedBosses.includes(prevBossId) : true
+
           const color = isBoss ? 0xef4444 : isSkill ? 0xf59e0b : 0x00d4ff
           const doneColor = 0x22d3ee
           const radius = isBoss ? 22 : isSkill ? 18 : 16
@@ -134,11 +138,19 @@ export default function GameMap() {
           }
 
           if (isGate) {
-            circle.setAlpha(0.2)
-            label.setAlpha(0.3)
-            glow.setAlpha(0)
-            ring.setAlpha(0)
-            icon.setText('🔒')
+            if (prevBossDone) {
+              circle.setAlpha(0.5)
+              label.setAlpha(0.6)
+              glow.setAlpha(0)
+              ring.setAlpha(0)
+              icon.setText('→')
+            } else {
+              circle.setAlpha(0.2)
+              label.setAlpha(0.3)
+              glow.setAlpha(0)
+              ring.setAlpha(0)
+              icon.setText('🔒')
+            }
           } else if (isDemoLocked) {
             circle.setAlpha(0.3)
             label.setAlpha(0.4)
@@ -147,10 +159,18 @@ export default function GameMap() {
             circle.on('pointerdown', () => { game.setView('payment'); playClick() })
             circle.on('pointerover', () => circle.setScale(1.2))
             circle.on('pointerout', () => circle.setScale(1))
-          } else if (!isDone && !isBoss && !isSkill) {
-            circle.on('pointerdown', () => { if (node.challengeId) game.startChallenge(node.challengeId); playClick() })
-            circle.on('pointerover', () => circle.setScale(1.2))
-            circle.on('pointerout', () => circle.setScale(1))
+          } else if (!isDone && !isBoss && !isSkill && !isGate) {
+            const isLocked = !prevBossDone
+            if (isLocked) {
+              circle.setAlpha(0.3)
+              label.setAlpha(0.4)
+              glow.setAlpha(0)
+              icon.setText('🔒')
+            } else {
+              circle.on('pointerdown', () => { if (node.challengeId) game.startChallenge(node.challengeId); playClick() })
+              circle.on('pointerover', () => circle.setScale(1.2))
+              circle.on('pointerout', () => circle.setScale(1))
+            }
           } else if (isBoss && !isDone) {
             const sectionAllDone = SECTIONS.find(s => s.boss.id === node.id)
             const sectionChallengesDone = sectionAllDone?.challenges.every(
