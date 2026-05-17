@@ -1,0 +1,79 @@
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import { ReactNode, useEffect } from 'react'
+
+interface ModalProps {
+  open: boolean
+  onClose: () => void
+  title?: string
+  children: ReactNode
+  className?: string
+}
+
+export default function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  className = '',
+}: ModalProps) {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    if (open) window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [open, onClose])
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+          <motion.div
+            className={`glass rounded-[var(--radius-xl)] p-6 sm:p-8 w-full max-w-lg relative shadow-lg ${className}`}
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+          >
+            {title && (
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">{title}</h2>
+                <button
+                  onClick={onClose}
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xl leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
