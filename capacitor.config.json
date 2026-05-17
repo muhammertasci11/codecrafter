@@ -3,7 +3,13 @@
   "appName": "CodeCrafter",
   "webDir": "out",
   "server": {
-    "androidScheme": "https"
+    "url": "https://codicrafter.netlify.app",
+    "cleartext": true,
+    "allowNavigation": [
+      "codicrafter.netlify.app",
+      "*.netlify.app",
+      "*.turso.io"
+    ]
   },
   "plugins": {
     "SplashScreen": {
@@ -11,6 +17,9 @@
       "backgroundColor": "#0a0a1a",
       "androidSplashResourceName": "splash",
       "androidScaleType": "CENTER_CROP"
+    },
+    "CapacitorHttp": {
+      "enabled": true
     }
   }
 }
