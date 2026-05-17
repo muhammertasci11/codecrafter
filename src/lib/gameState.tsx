@@ -1,6 +1,14 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import { onAuthChange } from './firebase'
+
+export interface FirebaseUser {
+  uid: string
+  displayName: string
+  email: string
+  photoURL: string
+}
 
 export type Language = 'javascript' | 'python' | 'java' | 'typescript' | 'csharp' | 'cpp' | 'c' | 'go' | 'rust' | 'kotlin' | 'swift' | 'php' | 'ruby' | 'scala' | 'dart' | 'r' | 'haskell' | 'lua' | 'perl' | 'julia' | 'sql' | 'bash' | 'html' | 'css'
 
@@ -101,6 +109,11 @@ interface GameState {
   setAdsEnabled: (enabled: boolean) => void
   setVIP: (vip: boolean) => void
   setHeartsUnlimited: (unlimited: boolean) => void
+  firebaseUser: FirebaseUser | null
+  displayName: string
+  photoURL: string
+  email: string
+  setFirebaseUser: (user: FirebaseUser | null) => void
 }
 
 const defaultProgress: GameProgress = {
@@ -136,12 +149,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [uiLanguage, setUiLanguageState] = useState<UiLanguage>('tr')
   const [progress, setProgress] = useState<GameProgress>(defaultProgress)
 
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
+  const [displayName, setDisplayName] = useState('')
+  const [photoURL, setPhotoURL] = useState('')
+  const [email, setEmail] = useState('')
+
   useEffect(() => {
     const saved = localStorage.getItem('codecrafter_progress')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        // Merge with defaultProgress so new fields (xp, coins, etc.) never become NaN
         setProgress({ ...defaultProgress, ...parsed })
       } catch { }
     }
@@ -153,6 +170,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setToken(savedToken)
       setUsername(savedUsername)
     }
+
+    const savedFirebaseUser = localStorage.getItem('codecrafter_firebase_user')
+    if (savedFirebaseUser) {
+      try {
+        const fu = JSON.parse(savedFirebaseUser)
+        setFirebaseUser(fu)
+        setDisplayName(fu.displayName)
+        setPhotoURL(fu.photoURL)
+        setEmail(fu.email)
+      } catch {}
+    }
+
     const savedLang = localStorage.getItem('codecrafter_language') as Language | null
     if (savedLang) {
       setPreferredLanguage(savedLang)
@@ -161,6 +190,35 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (['tr','en','es','fr','de','it','pt','ru','ar','zh','ja','ko','nl','pl','sv','el','hi'].includes(savedUiLang || '')) {
       setUiLanguageState(savedUiLang!)
     }
+
+    // Auto-guest username
+    if (!savedUsername) {
+      const guests = ['CodeCoder', 'ByteBoss', 'SyntaxHero', 'DevDragon', 'PixelPirate', 'LogicLord', 'CipherSamurai', 'DataWizard', 'QueryQueen', 'NullNinja']
+      const guestName = guests[Math.floor(Math.random() * guests.length)] + Math.floor(Math.random() * 100)
+      setUsername(guestName)
+      localStorage.setItem('codecrafter_username', guestName)
+    }
+
+    // Firebase auth state listener (auto-restore session)
+    const unsub = onAuthChange(firebaseUser => {
+      if (firebaseUser) {
+        const fu = {
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          email: firebaseUser.email || '',
+          photoURL: firebaseUser.photoURL || '',
+        }
+        setFirebaseUser(fu)
+        setDisplayName(fu.displayName)
+        setPhotoURL(fu.photoURL)
+        setEmail(fu.email)
+        if (fu.displayName) {
+          setUsername(fu.displayName)
+          localStorage.setItem('codecrafter_username', fu.displayName)
+        }
+        localStorage.setItem('codecrafter_firebase_user', JSON.stringify(fu))
+      }
+    })
 
     // Check Streak
     setProgress(p => {
@@ -261,8 +319,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     setToken(null)
     setUsername(null)
+    setFirebaseUser(null)
+    setDisplayName('')
+    setPhotoURL('')
+    setEmail('')
     localStorage.removeItem('codecrafter_token')
     localStorage.removeItem('codecrafter_username')
+    localStorage.removeItem('codecrafter_firebase_user')
   }, [])
 
   const resetProgress = useCallback(() => {
@@ -350,6 +413,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setProgress(p => ({ ...p, heartsUnlimited: unlimited }))
   }, [])
 
+  const handleSetFirebaseUser = useCallback((user: FirebaseUser | null) => {
+    setFirebaseUser(user)
+    if (user) {
+      setDisplayName(user.displayName)
+      setPhotoURL(user.photoURL)
+      setEmail(user.email)
+      if (user.displayName) {
+        setUsername(user.displayName)
+        localStorage.setItem('codecrafter_username', user.displayName)
+      }
+      localStorage.setItem('codecrafter_firebase_user', JSON.stringify(user))
+    } else {
+      setDisplayName('')
+      setPhotoURL('')
+      setEmail('')
+      localStorage.removeItem('codecrafter_firebase_user')
+    }
+  }, [])
+
   const setLanguage = useCallback((lang: Language) => {
     setPreferredLanguage(lang)
     localStorage.setItem('codecrafter_language', lang)
@@ -368,6 +450,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       addSkillPoint, buySkill, useSkill, setPaid, resetProgress, setAuth, logout,
       addXp, deductHeart, refillHearts, setLanguage,
       addCoins, spendCoins, addAdRevenue, withdrawAdRevenue, buyHeartWithCoins, setAdsEnabled, setVIP, setHeartsUnlimited,
+      firebaseUser, displayName, photoURL, email, setFirebaseUser: handleSetFirebaseUser,
     }}>
       {children}
     </GameContext.Provider>

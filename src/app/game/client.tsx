@@ -13,7 +13,7 @@ import SkillTree from '@/components/SkillTree'
 import PaymentScreen from '@/components/PaymentScreen'
 import AuthModal from '@/components/AuthModal'
 import Leaderboard from '@/components/Leaderboard'
-import Profile from '@/components/Profile'
+import HesabimModal from '@/components/HesabimModal'
 import LanguageSelect from '@/components/LanguageSelect'
 import BannerAd from '@/components/ads/BannerAd'
 import ShopScreen from '@/components/shop/ShopScreen'
@@ -119,19 +119,17 @@ function GameContent() {
             </button>
           ))}
 
-          {game.token ? (
-            <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-white/5">
-              <button onClick={() => setShowProfile(true)} className="text-xs text-[var(--accent-cyan)] hidden sm:inline font-mono hover:text-[var(--accent-blue)] transition-colors">{game.username}</button>
-              <button onClick={() => { syncProgress(); setSyncing(true); setTimeout(() => setSyncing(false), 1000) }} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]" title="Sync">
-                {syncing ? '🔄' : '☁️'}
-              </button>
-              <button onClick={game.logout} className="text-xs text-[var(--text-muted)] hover:text-[var(--danger)]">Çıkış</button>
-            </div>
-          ) : (
-            <button onClick={() => setShowAuth(true)} className="btn-primary text-xs px-3 py-1.5">
-              👤 Giriş
+          <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-white/5">
+            <button
+              onClick={() => setShowProfile(true)}
+              className="flex items-center gap-1.5 text-xs hover:bg-white/5 rounded-lg px-2 py-1 transition"
+            >
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center text-[10px] overflow-hidden shrink-0">
+                {game.photoURL ? <img src={game.photoURL} alt="" className="w-full h-full object-cover" /> : '👤'}
+              </span>
+              <span className="text-[var(--accent-cyan)] hidden sm:inline font-mono truncate max-w-[80px]">{game.displayName || game.username}</span>
             </button>
-          )}
+          </div>
 
           <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-white/5">
             <CoinBalance />
@@ -169,7 +167,7 @@ function GameContent() {
       <AnimatePresence>
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         {game.view === 'leaderboard' && <Leaderboard onClose={() => game.setView('map')} />}
-        {showProfile && <Profile onClose={() => setShowProfile(false)} />}
+        {showProfile && <HesabimModal onClose={() => setShowProfile(false)} />}
         {showShop && <ShopScreen onClose={() => setShowShop(false)} />}
       </AnimatePresence>
       <BannerAd />
