@@ -2,9 +2,9 @@ import { PurchaseService, ProductId, PRODUCTS } from './PurchaseService'
 
 const PURCHASED_KEYS: Record<string, string> = {
   remove_ads: 'codecrafter_purchased_remove_ads',
-  hearts_5: 'codecrafter_purchased_hearts_5',
-  hearts_20: 'codecrafter_purchased_hearts_20',
-  hearts_unlimited: 'codecrafter_purchased_hearts_unlimited',
+  energy_5: 'codecrafter_purchased_energy_5',
+  energy_20: 'codecrafter_purchased_energy_20',
+  energy_unlimited: 'codecrafter_purchased_energy_unlimited',
   coins_100: 'codecrafter_purchased_coins_100',
   coins_500: 'codecrafter_purchased_coins_500',
   vip_monthly: 'codecrafter_purchased_vip',

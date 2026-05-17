@@ -68,7 +68,7 @@ export default function ChallengeScreen() {
     setCodyMood('sad')
     setChallengeResult('wrong')
     playError()
-    const survived = game.deductHeart()
+    const survived = game.deductEnergy()
     if (!survived) {
       game.setView('map')
     }
@@ -166,9 +166,9 @@ export default function ChallengeScreen() {
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 p-4 rounded-[var(--radius-md)] bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-center"
         >
-          <span className="text-sm font-bold text-[var(--danger)]">Yanlis cevap! -1 Kalp</span>
+          <span className="text-sm font-bold text-[var(--danger)]">Yanlis cevap! -1 Enerji</span>
           <div className="flex justify-center gap-2 mt-2">
-            <RewardedVideoButton rewardType="heart" rewardAmount={1} label="Video Izle +1 Kalp" />
+            <RewardedVideoButton rewardType="energy" rewardAmount={1} label="Video Izle +1 Enerji" />
           </div>
         </motion.div>
       )}

@@ -95,7 +95,7 @@ export default function BossFight() {
     setRedFlash(true)
     setTimeout(() => { setShake(false); setRedFlash(false) }, 500)
     game.takeBossDamage()
-    const survived = game.deductHeart()
+    const survived = game.deductEnergy()
     
     if (!survived || game.progress.bossHp <= 1) {
       setTimeout(() => setDefeat(true), 300)
@@ -347,9 +347,9 @@ export default function BossFight() {
                   🔄 Tekrar Dene
                 </button>
                 <RewardedVideoButton
-                  rewardType="heart"
+                  rewardType="energy"
                   rewardAmount={2}
-                  label="Video Izle +2 Kalp ile Tekrar Dene"
+                  label="Video Izle +2 Enerji ile Tekrar Dene"
                   onReward={() => { setDefeat(false); game.startBoss(boss.id) }}
                 />
                 <button

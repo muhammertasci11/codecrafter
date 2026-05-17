@@ -18,6 +18,8 @@ import BannerAd from '@/components/ads/BannerAd'
 import ShopScreen from '@/components/shop/ShopScreen'
 import CoinBalance from '@/components/shop/CoinBalance'
 import GameMapList from '@/components/GameMapList'
+import StoryDialog from '@/components/ui/StoryDialog'
+import { STORIES } from '@/lib/gameData'
 import { playClick } from '@/lib/audio'
 
 function PaymentGate({ children }: { children: React.ReactNode }) {
@@ -76,6 +78,30 @@ function GameContent() {
 
   useEffect(() => { if (game.token) syncProgress() }, [game.progress.completedChallenges.length])
 
+  useEffect(() => {
+    if (!game.currentStoryId) {
+      const p = game.progress;
+      const seen = p.seenStories || [];
+      const tryShow = (id: string) => {
+        if (!seen.includes(id)) {
+          game.showStory(id);
+          return true;
+        }
+        return false;
+      };
+
+      if (!p.completedChallenges.length && !p.completedBosses.length) {
+        tryShow('story-intro');
+      } else if (p.completedBosses.includes('boss-loops')) {
+        tryShow('story-functions');
+      } else if (p.completedBosses.includes('boss-basics')) {
+        tryShow('story-loops');
+      }
+    }
+  }, [game.progress.completedChallenges, game.progress.completedBosses, game.currentStoryId, game.showStory, game.progress.seenStories])
+
+  const currentStory = game.currentStoryId ? STORIES.find(s => s.id === game.currentStoryId) : null;
+
   const navItems: { icon: string; label: string; view: View }[] = [
     { icon: '🗺️', label: 'Harita', view: 'map' },
     { icon: '🏆', label: 'Liderlik', view: 'leaderboard' },
@@ -100,7 +126,7 @@ function GameContent() {
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="hidden sm:flex items-center gap-2 mr-1 pr-2 border-r border-white/5">
             <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">🔥 <span className="text-[var(--text-secondary)] font-mono">{game.progress.streak || 0}</span></span>
-            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">💔 <span className="text-[var(--accent-pink)] font-mono">{game.progress.hearts ?? 5}</span></span>
+            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">⚡ <span className="text-[var(--accent-blue)] font-mono">{game.progress.energy ?? 5}</span></span>
           </div>
 
           {navItems.map(item => (
@@ -163,6 +189,7 @@ function GameContent() {
       </div>
 
       <AnimatePresence>
+        {currentStory && <StoryDialog story={currentStory} onComplete={() => game.finishStory(currentStory.id)} />}
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         {game.view === 'leaderboard' && <Leaderboard onClose={() => game.setView('map')} />}
         {showProfile && <HesabimModal onClose={() => setShowProfile(false)} />}

@@ -6,7 +6,7 @@ import { useAdService } from '@/lib/ads/AdProvider'
 import { useGame } from '@/lib/gameState'
 
 interface RewardedVideoButtonProps {
-  rewardType: 'heart' | 'coin'
+  rewardType: 'energy' | 'coin'
   rewardAmount: number
   onReward?: () => void
   label?: string
@@ -29,11 +29,11 @@ export default function RewardedVideoButton({
 
   if (!game.progress.adsEnabled || game.progress.isVIP) return null
 
-  const defaultLabel = rewardType === 'heart'
-    ? `Video Izle +${rewardAmount} Kalp`
+  const defaultLabel = rewardType === 'energy'
+    ? `Video Izle +${rewardAmount} Enerji`
     : `Video Izle +${rewardAmount} Coin`
 
-  const icon = rewardType === 'heart' ? '❤️' : '🪙'
+  const icon = rewardType === 'energy' ? '⚡' : '🪙'
 
   const handleClick = () => {
     setLoading(true)
@@ -41,8 +41,8 @@ export default function RewardedVideoButton({
     adService.showRewardedVideo(
       () => {
         setLoading(false)
-        if (rewardType === 'heart') {
-          game.refillHearts()
+        if (rewardType === 'energy') {
+          game.refillEnergy()
         } else {
           game.addCoins(rewardAmount)
         }

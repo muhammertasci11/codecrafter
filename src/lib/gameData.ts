@@ -74,6 +74,49 @@ export interface MapNode {
   sectionId: string
 }
 
+export interface StoryNode {
+  id: string
+  title: string
+  content: string[]
+  triggerNodeId: string
+}
+
+export const STORIES: StoryNode[] = [
+  {
+    id: 'story-intro',
+    title: 'Bölüm 1: Uyanış',
+    content: [
+      'Gözlerini açtığında kendini dijital bir evrenin ortasında buldun.',
+      'Eski ustaların bıraktığı efsaneye göre, bu dünyayı "Kod" adı verilen büyü yönetiyor.',
+      'Syntax Şeytanı isimli bir varlık, temel yapı taşlarını çaldı ve her yeri kaosa sürükledi.',
+      'Onu durdurmak ve evrenin dengesini yeniden kurmak zorundasın. İlk hedefin: Değişkenler vadisi!'
+    ],
+    triggerNodeId: 'start'
+  },
+  {
+    id: 'story-loops',
+    title: 'Bölüm 2: Sonsuzluk Sarmalı',
+    content: [
+      'Syntax Şeytanı\'nı alt ettin! Ancak asıl tehlike şimdi başlıyor.',
+      'Sonsuz Döngü Canavarı, zamanı bir ilmeğe hapsetti.',
+      'Döngüleri kontrol etmeyi öğrenmezsen, sonsuza dek aynı saniyeyi yaşayacaksın.',
+      'İleriye doğru adım at ve For, While gibi güçlü büyüleri öğren.'
+    ],
+    triggerNodeId: 'gate-1'
+  },
+  {
+    id: 'story-functions',
+    title: 'Bölüm 3: Soyutlamanın Gücü',
+    content: [
+      'Zaman ilmeğinden kurtulmayı başardın.',
+      'Şimdi karşında Kod Kralı var. O, büyüleri küçük, tekrar kullanılabilir parçalara bölebilen bir dahi.',
+      'Fonksiyonlar olmadan onun karşısında hiçbir şansın yok.',
+      'Kendi büyülerini yaratma zamanı geldi!'
+    ],
+    triggerNodeId: 'gate-2'
+  }
+]
+
 export const CHALLENGES: Record<string, Challenge> = {
   'basics-1': {
     id: 'basics-1',

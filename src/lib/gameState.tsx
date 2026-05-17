@@ -62,14 +62,18 @@ export interface GameProgress {
   bossMaxHp: number
   bossStage: number
   xp: number
-  hearts: number
+  energy: number
   streak: number
   lastActiveDate: string | null
+  lastEnergyUpdate: string | null
   coins: number
   adRevenue: number
   adsEnabled: boolean
   isVIP: boolean
-  heartsUnlimited: boolean
+  energyUnlimited: boolean
+  ownedCosmetics: string[]
+  equippedCosmetics: { avatarFrame: string | null, nameColor: string | null, codeTheme: string | null, victoryEffect: string | null }
+  seenStories: string[]
 }
 
 interface GameState {
@@ -99,21 +103,26 @@ interface GameState {
   setLanguage: (lang: Language) => void
   logout: () => void
   addXp: (amount: number) => void
-  deductHeart: () => boolean
-  refillHearts: () => void
+  deductEnergy: () => boolean
+  refillEnergy: () => void
   addCoins: (amount: number) => void
   spendCoins: (amount: number) => boolean
   addAdRevenue: (amount: number) => void
   withdrawAdRevenue: (amount: number) => boolean
-  buyHeartWithCoins: () => boolean
+  buyEnergyWithCoins: () => boolean
   setAdsEnabled: (enabled: boolean) => void
   setVIP: (vip: boolean) => void
-  setHeartsUnlimited: (unlimited: boolean) => void
+  setEnergyUnlimited: (unlimited: boolean) => void
   firebaseUser: FirebaseUser | null
   displayName: string
   photoURL: string
   email: string
   setFirebaseUser: (user: FirebaseUser | null) => void
+  buyCosmetic: (id: string) => void
+  equipCosmetic: (category: 'avatarFrame' | 'nameColor' | 'codeTheme' | 'victoryEffect', id: string | null) => void
+  currentStoryId: string | null
+  showStory: (id: string) => void
+  finishStory: (id: string) => void
 }
 
 const defaultProgress: GameProgress = {
@@ -126,14 +135,18 @@ const defaultProgress: GameProgress = {
   bossMaxHp: 3,
   bossStage: 0,
   xp: 0,
-  hearts: 5,
+  energy: 5,
   streak: 0,
   lastActiveDate: null,
+  lastEnergyUpdate: null,
   coins: 0,
   adRevenue: 0,
   adsEnabled: true,
   isVIP: false,
-  heartsUnlimited: false,
+  energyUnlimited: false,
+  ownedCosmetics: [],
+  equippedCosmetics: { avatarFrame: null, nameColor: null, codeTheme: null, victoryEffect: null },
+  seenStories: [],
 }
 
 const GameContext = createContext<GameState | null>(null)
@@ -148,6 +161,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [preferredLanguage, setPreferredLanguage] = useState<Language>('javascript')
   const [uiLanguage, setUiLanguageState] = useState<UiLanguage>('tr')
   const [progress, setProgress] = useState<GameProgress>(defaultProgress)
+  const [currentStoryId, setCurrentStoryId] = useState<string | null>(null)
 
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null)
   const [displayName, setDisplayName] = useState('')
@@ -236,6 +250,28 @@ export function GameProvider({ children }: { children: ReactNode }) {
       } else {
         return { ...p, streak: 1, lastActiveDate: today }
       }
+    })
+
+    // Check Energy Auto-regeneration
+    setProgress(p => {
+      if (p.energy >= 5 || p.energyUnlimited) return p;
+      if (!p.lastEnergyUpdate) return { ...p, lastEnergyUpdate: new Date().toISOString() };
+      
+      const last = new Date(p.lastEnergyUpdate);
+      const curr = new Date();
+      const diffMs = curr.getTime() - last.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins >= 10) {
+        const energyToAdd = Math.floor(diffMins / 10);
+        const newEnergy = Math.min(5, p.energy + energyToAdd);
+        return { 
+          ...p, 
+          energy: newEnergy, 
+          lastEnergyUpdate: newEnergy < 5 ? new Date(last.getTime() + energyToAdd * 10 * 60000).toISOString() : null
+        };
+      }
+      return p;
     })
   }, [])
 
@@ -337,21 +373,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setProgress(p => ({ ...p, xp: p.xp + amount }))
   }, [])
 
-  const deductHeart = useCallback(() => {
+  const deductEnergy = useCallback(() => {
     let survived = true
     setProgress(p => {
-      if (p.hearts <= 0) {
+      if (p.energyUnlimited) return p;
+      if (p.energy <= 0) {
         survived = false
         return p
       }
-      survived = p.hearts > 1
-      return { ...p, hearts: p.hearts - 1 }
+      survived = p.energy > 1
+      const newEnergy = p.energy - 1
+      return { 
+        ...p, 
+        energy: newEnergy,
+        lastEnergyUpdate: newEnergy < 5 && !p.lastEnergyUpdate ? new Date().toISOString() : p.lastEnergyUpdate
+      }
     })
     return survived
   }, [])
 
-  const refillHearts = useCallback(() => {
-    setProgress(p => ({ ...p, hearts: 5 }))
+  const refillEnergy = useCallback(() => {
+    setProgress(p => ({ ...p, energy: 5, lastEnergyUpdate: null }))
   }, [])
 
   const addCoins = useCallback((amount: number) => {
@@ -388,12 +430,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return success
   }, [])
 
-  const buyHeartWithCoins = useCallback(() => {
+  const buyEnergyWithCoins = useCallback(() => {
     let success = false
     setProgress(p => {
-      if (p.coins >= 2 && p.hearts < 5) {
+      if (p.coins >= 2 && p.energy < 5) {
         success = true
-        return { ...p, coins: p.coins - 2, hearts: p.hearts + 1 }
+        return { ...p, coins: p.coins - 2, energy: p.energy + 1, lastEnergyUpdate: (p.energy + 1) >= 5 ? null : p.lastEnergyUpdate }
       }
       success = false
       return p
@@ -406,11 +448,40 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const setVIP = useCallback((vip: boolean) => {
-    setProgress(p => ({ ...p, isVIP: vip, adsEnabled: !vip ? p.adsEnabled : false, heartsUnlimited: vip ? true : p.heartsUnlimited }))
+    setProgress(p => ({ ...p, isVIP: vip, adsEnabled: !vip ? p.adsEnabled : false, energyUnlimited: vip ? true : p.energyUnlimited }))
   }, [])
 
-  const setHeartsUnlimited = useCallback((unlimited: boolean) => {
-    setProgress(p => ({ ...p, heartsUnlimited: unlimited }))
+  const setEnergyUnlimited = useCallback((unlimited: boolean) => {
+    setProgress(p => ({ ...p, energyUnlimited: unlimited }))
+  }, [])
+
+  const buyCosmetic = useCallback((id: string) => {
+    setProgress(p => {
+      if (p.ownedCosmetics.includes(id)) return p
+      return { ...p, ownedCosmetics: [...p.ownedCosmetics, id] }
+    })
+  }, [])
+
+  const equipCosmetic = useCallback((category: 'avatarFrame' | 'nameColor' | 'codeTheme' | 'victoryEffect', id: string | null) => {
+    setProgress(p => ({
+      ...p,
+      equippedCosmetics: {
+        ...p.equippedCosmetics,
+        [category]: id
+      }
+    }))
+  }, [])
+
+  const showStory = useCallback((id: string) => {
+    setCurrentStoryId(id)
+  }, [])
+
+  const finishStory = useCallback((id: string) => {
+    setProgress(p => ({
+      ...p,
+      seenStories: [...new Set([...(p.seenStories || []), id])]
+    }))
+    setCurrentStoryId(null)
   }, [])
 
   const handleSetFirebaseUser = useCallback((user: FirebaseUser | null) => {
@@ -448,9 +519,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setUiLanguage, setView, startChallenge, startBoss, completeChallenge,
       completeBossStage, completeBoss, takeBossDamage,
       addSkillPoint, buySkill, useSkill, setPaid, resetProgress, setAuth, logout,
-      addXp, deductHeart, refillHearts, setLanguage,
-      addCoins, spendCoins, addAdRevenue, withdrawAdRevenue, buyHeartWithCoins, setAdsEnabled, setVIP, setHeartsUnlimited,
+      addXp, deductEnergy, refillEnergy, setLanguage,
+      addCoins, spendCoins, addAdRevenue, withdrawAdRevenue, buyEnergyWithCoins, setAdsEnabled, setVIP, setEnergyUnlimited,
       firebaseUser, displayName, photoURL, email, setFirebaseUser: handleSetFirebaseUser,
+      buyCosmetic, equipCosmetic,
+      currentStoryId, showStory, finishStory,
     }}>
       {children}
     </GameContext.Provider>

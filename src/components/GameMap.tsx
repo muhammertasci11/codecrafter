@@ -117,7 +117,7 @@ export default function GameMap() {
             .setStrokeStyle(2, isDone ? 0x22d3ee : 0xffffff, isDone ? 0.9 : 0.3)
             .setInteractive({ useHandCursor: true })
 
-          const icon = this.add.text(node.x, node.y, isBoss ? '👹' : isSkill ? '⭐' : isDone ? '✓' : '', {
+          const icon = this.add.text(node.x, node.y, isBoss ? '👹' : isSkill ? '⭐' : isDone ? '✅' : '', {
             fontSize: isBoss ? '20px' : '16px'
           }).setOrigin(0.5)
 
