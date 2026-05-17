@@ -54,8 +54,14 @@ function GameContent() {
   const [showAuth, setShowAuth] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [syncing, setSyncing] = useState(false)
-  const [showLangSelect, setShowLangSelect] = useState(!localStorage.getItem('codecrafter_language'))
+  const [showLangSelect, setShowLangSelect] = useState(false)
   const [showShop, setShowShop] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('codecrafter_language')) {
+      setShowLangSelect(true)
+    }
+  }, [])
 
   const syncProgress = useCallback(async () => {
     if (!game.token) return
