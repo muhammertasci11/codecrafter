@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GameProvider, useGame, type View } from '@/lib/gameState'
 import { AdProvider } from '@/lib/ads/AdProvider'
@@ -18,9 +17,8 @@ import LanguageSelect from '@/components/LanguageSelect'
 import BannerAd from '@/components/ads/BannerAd'
 import ShopScreen from '@/components/shop/ShopScreen'
 import CoinBalance from '@/components/shop/CoinBalance'
+import GameMapList from '@/components/GameMapList'
 import { playClick } from '@/lib/audio'
-
-const GameMap = dynamic(() => import('@/components/GameMap'), { ssr: false })
 
 function PaymentGate({ children }: { children: React.ReactNode }) {
   const game = useGame()
@@ -155,7 +153,7 @@ function GameContent() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.25 }}
           >
-            {(game.view === 'map' || game.view === 'leaderboard') && <GameMap />}
+            {(game.view === 'map' || game.view === 'leaderboard') && <GameMapList />}
             {game.view === 'challenge' && <ChallengeScreen />}
             {game.view === 'boss' && <BossFight />}
             {game.view === 'skillTree' && <SkillTree />}
