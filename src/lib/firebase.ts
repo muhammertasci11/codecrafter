@@ -12,11 +12,17 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
 }
 
-export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
-export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
+const hasConfig = Boolean(firebaseConfig.apiKey)
+
+export const app = hasConfig ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()) : null
+export const auth = app ? getAuth(app) : null
+export const googleProvider = app ? new GoogleAuthProvider() : null
 
 export async function signInWithGoogle(): Promise<User | null> {
+  if (!auth || !googleProvider) {
+    alert('Firebase yapılandırması eksik. Lütfen Netlify panelinden (Site configuration > Environment variables) Firebase API anahtarlarını ekleyin.')
+    return null
+  }
   try {
     const result = await signInWithPopup(auth, googleProvider)
     return result.user
@@ -26,9 +32,13 @@ export async function signInWithGoogle(): Promise<User | null> {
 }
 
 export async function signOutUser(): Promise<void> {
+  if (!auth) return
   await signOut(auth)
 }
 
 export function onAuthChange(callback: (user: User | null) => void): () => void {
+  if (!auth) {
+    return () => {}
+  }
   return onAuthStateChanged(auth, callback)
 }
