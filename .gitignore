@@ -10,3 +10,4 @@ out/
 *.tsbuildinfo
 scratch/
 .superpowers/
+build_output.txt
