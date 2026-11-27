@@ -7,3 +7,6 @@ data/
 .cache/
 out/
 .vercel/
+*.tsbuildinfo
+scratch/
+.superpowers/
