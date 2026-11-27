@@ -4,6 +4,8 @@ A programming course that plays like a role-playing game. You walk a character a
 
 Interface is Turkish. Challenge content exists for 23 languages, from Python and C to Haskell and Julia.
 
+**Live:** [codecrafter-chi.vercel.app](https://codecrafter-chi.vercel.app)
+
 ## How it plays
 
 Six chapters — **basics, loops, functions, arrays, objects, es6** — each with three challenges and a three-stage boss. A chapter stays locked until the previous boss is beaten.
