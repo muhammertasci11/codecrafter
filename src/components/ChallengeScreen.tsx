@@ -14,6 +14,10 @@ import NativeAd from '@/components/ads/NativeAd'
 import InterstitialAd from '@/components/ads/InterstitialAd'
 
 const DragDropChallenge = dynamic(() => import('@/components/ui/DragDropChallenge'), { ssr: false })
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
+  ssr: false,
+  loading: () => <div className="h-[260px] bg-[var(--bg-primary)]" />,
+})
 
 const sectionColors: Record<string, string> = {
   basics: '#00d4ff',
@@ -237,11 +241,35 @@ function CodeChallenge({ challenge, onCorrect, onWrong }: {
             {lang === 'javascript' ? '🟨 JS' : lang === 'python' ? '🐍 Py' : '☕ Java'}
           </span>
         </div>
-        <textarea
+        <MonacoEditor
+          height="260px"
+          language={lang === 'javascript' ? 'javascript' : lang === 'python' ? 'python' : 'java'}
+          theme="codecrafter"
+          beforeMount={monaco => {
+            monaco.editor.defineTheme('codecrafter', {
+              base: 'vs-dark',
+              inherit: true,
+              rules: [],
+              colors: {
+                'editor.background': '#0a0a1a',
+                'editorGutter.background': '#0a0a1a',
+                'editor.lineHighlightBackground': '#ffffff0a',
+                'editorLineNumber.foreground': '#3f4a63',
+                'editorLineNumber.activeForeground': '#7dd3fc',
+              },
+            })
+          }}
           value={code}
-          onChange={e => setCode(e.target.value)}
-          className="w-full bg-[var(--bg-primary)] text-[var(--text-primary)] font-mono text-sm p-4 outline-none resize-y min-h-[200px] border-0"
-          spellCheck={false}
+          onChange={value => setCode(value ?? '')}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 14,
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            padding: { top: 12 },
+          }}
         />
       </div>
 

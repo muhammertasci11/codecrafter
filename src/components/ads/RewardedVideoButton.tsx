@@ -63,7 +63,7 @@ export default function RewardedVideoButton({
         disabled={loading || disabled}
         className="text-xs text-[var(--accent-blue)] hover:text-[var(--accent-cyan)] transition flex items-center gap-1 disabled:opacity-50"
       >
-        {loading ? '⏳' : '📺'} {loading ? 'Yukleniyor...' : (error ? 'Hata' : (label || defaultLabel))}
+        {loading ? '⏳' : '📺'} {loading ? 'Yükleniyor...' : (error ? 'Hata' : (label || defaultLabel))}
       </button>
     )
   }
@@ -79,7 +79,7 @@ export default function RewardedVideoButton({
       whileHover={{ scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
     >
-      {loading ? '⏳' : '📺'} {loading ? 'Reklam Yukleniyor...' : (error ? 'Reklam Yuklenemedi' : `${icon} ${label || defaultLabel}`)}
+      {loading ? '⏳' : '📺'} {loading ? 'Reklam Yükleniyor...' : (error ? 'Reklam Yüklenemedi' : `${icon} ${label || defaultLabel}`)}
     </motion.button>
   )
 }

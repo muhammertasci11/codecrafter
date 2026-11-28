@@ -56,10 +56,10 @@ export default function GameMapList() {
           animate={{ opacity: 1, y: 0 }}
           className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
         >
-          Kod Macerasi
+          Kod Macerası
         </motion.h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
-          {game.progress.completedChallenges.length}/18 meydan okuma tamamlandi
+          {game.progress.completedChallenges.length}/18 meydan okuma tamamlandı
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export default function GameMapList() {
                       {section.name}
                     </h2>
                     {locked && <span className="text-[10px] text-gray-500">🔒</span>}
-                    {bossDone && <span className="text-emerald-400 text-xs">✅ Tamamlandi</span>}
+                    {bossDone && <span className="text-emerald-400 text-xs">✅ Tamamlandı</span>}
                   </div>
                   <p className="text-[11px] text-[var(--text-muted)] truncate">{section.description}</p>
                 </div>
@@ -166,11 +166,11 @@ export default function GameMapList() {
                               {challenge?.title || challengeId}
                             </p>
                             <p className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
-                              {locked ? 'Bu bolumu acmak icin onceki bolumu tamamla' : challenge?.description || ''}
+                              {locked ? 'Bu bölümü açmak için önceki bölümü tamamla' : challenge?.description || ''}
                             </p>
                           </div>
 
-                          {completed && <span className="text-emerald-400/60 text-[10px]">Tamamlandi</span>}
+                          {completed && <span className="text-emerald-400/60 text-[10px]">Tamamlandı</span>}
                         </div>
                       </button>
                     )
@@ -211,11 +211,11 @@ export default function GameMapList() {
                         </p>
                         <p className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
                           {locked
-                            ? 'Onceki bolumu tamamla'
+                            ? 'Önceki bölümü tamamla'
                             : !allChallengesDone
-                              ? 'Tum meydan okumalari tamamla'
+                              ? 'Tüm meydan okumaları tamamla'
                               : bossDone
-                                ? 'Maglup edildi!'
+                                ? 'Mağlup edildi!'
                                 : section.boss.description}
                         </p>
                       </div>

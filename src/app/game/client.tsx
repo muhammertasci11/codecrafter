@@ -163,7 +163,7 @@ function GameContent() {
 
           <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-white/5">
             <CoinBalance />
-            <span className="text-xs text-[var(--text-muted)] font-mono">{game.progress.skillPoints} 🪙</span>
+            <span className="text-xs text-[var(--text-muted)] font-mono" title="Yetenek puanı">{game.progress.skillPoints} ⭐</span>
             <span className="text-xs text-[var(--text-muted)] font-mono">{game.progress.completedChallenges.length}/18</span>
             <button
               onClick={() => setShowShop(true)}

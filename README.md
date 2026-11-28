@@ -6,11 +6,13 @@ Interface is Turkish. Challenge content exists for 23 languages, from Python and
 
 **Live:** [codecrafter-chi.vercel.app](https://codecrafter-chi.vercel.app)
 
+<img src="docs/shots/map.jpg" width="49%" alt="Chapter map — six chapters, three challenge nodes each, locked chapters greyed out"> <img src="docs/shots/challenge.jpg" width="49%" alt="Challenge screen — Monaco editor with line numbers, the challenge text and a run button">
+
 ## How it plays
 
 Six chapters — **basics, loops, functions, arrays, objects, es6** — each with three challenges and a three-stage boss. A chapter stays locked until the previous boss is beaten.
 
-- **Map** — Phaser canvas, character walks between nodes
+- **Map** — a chapter list with a vertical path, one node per challenge; the next chapter stays locked until the previous boss falls
 - **Editor** — Monaco, syntax highlighting per language
 - **Challenges** — fill in the body, answer a quiz, or drag statements into order
 - **Bosses** — three consecutive stages, health drains on every failed run
@@ -49,8 +51,12 @@ Without `TURSO_DATABASE_URL` the app falls back to `data/codecrafter.db`. Ad slo
 
 ## Stack
 
-Next.js · React · TypeScript · Phaser · Monaco · Capacitor · Turso · Tailwind
+Next.js · React · TypeScript · Monaco · Capacitor · Turso · Tailwind
 
 ## Known limitations
 
 The three execution routes run submitted code on the server process. A Node `vm` context is not a security boundary and a child process is not one either, so this deployment is meant for a trusted audience. Putting a container or a third-party execution service behind those routes is the work that remains before it can be opened to the public.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

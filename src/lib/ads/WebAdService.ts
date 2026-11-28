@@ -117,7 +117,7 @@ export class WebAdService implements AdService {
 
     const timer = document.createElement('div')
     timer.style.cssText = 'color:#94a3b8;font-size:12px;margin-bottom:12px;'
-    timer.textContent = 'Reklam yukleniyor...'
+    timer.textContent = 'Reklam yükleniyor...'
     card.appendChild(timer)
 
     const adSlot = document.createElement('div')

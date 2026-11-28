@@ -11,12 +11,13 @@ export default function StoryDialog({ story, onComplete }: { story: StoryNode, o
   useEffect(() => {
     setIsTyping(true)
     setDisplayedText('')
-    let charIndex = 0
+    let shown = 0
     const interval = setInterval(() => {
-      if (charIndex < currentLine.length) {
-        setDisplayedText(prev => prev + currentLine[charIndex])
-        charIndex++
-      } else {
+      shown++
+      // Derive the whole string from a counter so a replayed update can never
+      // duplicate or drop a character, and stop exactly at the end of the line.
+      setDisplayedText(currentLine.slice(0, shown))
+      if (shown >= currentLine.length) {
         setIsTyping(false)
         clearInterval(interval)
       }
